@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Test</title>
+</head>
+<body>
+    <button onclick="testLogin()">Test Login</button>
+
+    <script>
+    async function testLogin() {
+        try {
+            const token = localStorage.getItem('manage_token') || 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdGFmZlR5cGUiOjEsImV4cCI6MTczNTU4MTA4Miwic3RhZmZJZCI6MSwidXNlcm5hbWUiOiJyb290In0.kupe4KanUvQanis_Z2x3Tc8G588xpJtc4f3YewqUrC0';
+            const response = await fetch('http://43.139.6.217:10060/department/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'POST',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Authorization': `Bearer ${token}`,
+                    'token': token
+                },
+                // mode: 'cors',
+                credentials: 'include',
+                body: JSON.stringify({
+                    className: "test",
+                    department: "test"
+                })
+            });
+
+            const data = await response.json();
+            console.log('Response:', data);
+            
+            if (data.code === 200) {
+                console.log('Login successful! Token:', data.data);
+            } else {
+                console.log('Login failed:', data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+    </script>
+</body>
+</html>

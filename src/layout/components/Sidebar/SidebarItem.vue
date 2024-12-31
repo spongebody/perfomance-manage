@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!item.hidden">
+  <div v-if="!item.hidden && hasPermission(item)">
     <template v-if="hasOneShowingChild(item.children,item) && (!onlyOneChild.children||onlyOneChild.noShowingChildren)&&!item.alwaysShow">
       <app-link v-if="onlyOneChild.meta" :to="resolvePath(onlyOneChild.path)">
         <el-menu-item :index="resolvePath(onlyOneChild.path)" :class="{'submenu-title-noDropdown':!isNest}">
@@ -89,6 +89,13 @@ export default {
         return this.basePath
       }
       return path.resolve(this.basePath, routePath)
+    },
+    hasPermission(item) {
+      const permission = item.meta && item.meta.permission
+      if (!permission) return true
+      
+      const staffType = this.$store.getters.staffType
+      return permission.includes(staffType)
     }
   }
 }

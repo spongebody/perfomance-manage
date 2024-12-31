@@ -27,7 +27,17 @@ router.beforeEach(async(to, from, next) => {
       NProgress.done()
     } else {
       const hasGetUserInfo = store.getters.name
+      console.log('hasGetUserInfo', hasGetUserInfo)
       if (hasGetUserInfo) {
+        // Add permission check
+        if (to.meta && to.meta.permission) {
+          const staffType = store.getters.staffType
+          if (!to.meta.permission.includes(staffType)) {
+            next('/401')
+            NProgress.done()
+            return
+          }
+        }
         next()
       } else {
         try {
@@ -36,6 +46,7 @@ router.beforeEach(async(to, from, next) => {
 
           next()
         } catch (error) {
+          console.log('custom error', error)
           // remove token and go to login page to re-login
           await store.dispatch('user/resetToken')
           Message.error(error || 'Has Error')
