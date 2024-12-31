@@ -63,7 +63,17 @@
 
     <!-- Dialog -->
     <el-dialog :title="dialogTitle" :visible.sync="dialogVisible">
+      <!-- Detail View -->
+      <el-descriptions v-if="dialogType === 'detail'" :column="1" border>
+        <el-descriptions-item label="部门">{{ temp.department }}</el-descriptions-item>
+        <el-descriptions-item label="教研室">{{ temp.className }}</el-descriptions-item>
+        <el-descriptions-item label="创建时间">{{ formatTime(temp.createTime) }}</el-descriptions-item>
+        <el-descriptions-item label="修改时间">{{ formatTime(temp.updateTime) }}</el-descriptions-item>
+      </el-descriptions>
+
+      <!-- Edit/Create Form -->
       <el-form
+        v-else
         ref="dataForm"
         :rules="rules"
         :model="temp"
@@ -76,16 +86,18 @@
         <el-form-item label="教研室" prop="className">
           <el-input v-model="temp.className" placeholder="请输入教研室名称" />
         </el-form-item>
-        <el-form-item label="创建时间" prop="createTime">
-          <el-input :value="formatTime(temp.createTime)" disabled />
-        </el-form-item>
-        <el-form-item label="修改时间" prop="updateTime">
-          <el-input :value="formatTime(temp.updateTime)" disabled />
-        </el-form-item>
+        <template v-if="dialogType === 'edit'">
+          <el-form-item label="创建时间">
+            <el-input :value="formatTime(temp.createTime)" disabled />
+          </el-form-item>
+          <el-form-item label="修改时间">
+            <el-input :value="formatTime(temp.updateTime)" disabled />
+          </el-form-item>
+        </template>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitForm">确定</el-button>
+        <el-button v-if="dialogType !== 'detail'" type="primary" @click="submitForm">确定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -119,7 +131,8 @@ export default {
       rules: {
         department: [{ required: true, message: '请输入部门名称', trigger: 'blur' }],
         className: [{ required: true, message: '请输入教研室名称', trigger: 'blur' }]
-      }
+      },
+      dialogType: ''
     }
   },
   created() {
@@ -161,6 +174,7 @@ export default {
     handleCreate() {
       this.resetTemp()
       this.dialogTitle = '新增部门'
+      this.dialogType = 'create'
       this.dialogVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
@@ -169,6 +183,7 @@ export default {
     handleUpdate(row) {
       this.temp = Object.assign({}, row)
       this.dialogTitle = '编辑部门'
+      this.dialogType = 'edit'
       this.dialogVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
@@ -189,10 +204,8 @@ export default {
     handleDetail(row) {
       this.temp = Object.assign({}, row)
       this.dialogTitle = '部门详情'
+      this.dialogType = 'detail'
       this.dialogVisible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
     },
     async submitForm() {
       this.$refs['dataForm'].validate(async (valid) => {
